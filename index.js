@@ -1,12 +1,4 @@
-const http = require('http');
-const trailingSlash = require('./lib/normalize-slash');
+const server = require('./lib/server');
 
-http.createServer((req, res) => {
-  res.writeHead(200);
-  if (trailingSlash(req.url) === '/test/') {
-    res.write('sup test');
-  } else {
-    res.write('sup yall');
-  }
-  return res.end();
-}).listen(3000);
+// TODO async await to deal with server post data
+server({ port: 3000 });
