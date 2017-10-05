@@ -1,0 +1,19 @@
+{
+  "name": "webhook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "dev": "nodemon index.js"
+  },
+  "author": "John Foderaro",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb-base": "^12.0.1",
+    "eslint-plugin-import": "^2.7.0",
+    "mocha": "^4.0.0",
+    "nodemon": "^1.12.1"
+  }
+}
