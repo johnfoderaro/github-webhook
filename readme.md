@@ -19,5 +19,12 @@ async await / promises
 const webhook = require('webhook');
 
 const payload = webhook({
-
+  token: '',
+  secret: '',
+  port: '',
+  endPoint: '',
+  logs: true
+  postReceive: [
+    //TODO commands to execute asynchronously
+  ]
 });
