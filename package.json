@@ -1,11 +1,11 @@
 {
   "name": "webhook",
   "version": "1.0.0",
-  "description": "",
+  "description": "Web hook app",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js --delay 500ms --ignore test/ & mocha -w"
   },
   "author": "John Foderaro",
   "license": "MIT",
@@ -15,5 +15,18 @@
     "eslint-plugin-import": "^2.7.0",
     "mocha": "^4.0.0",
     "nodemon": "^1.12.1"
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnfoderaro/webhook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnfoderaro/webhook/issues"
+  },
+  "homepage": "https://github.com/johnfoderaro/webhook#readme"
 }
