@@ -30,11 +30,11 @@ describe('webhook', () => {
   });
   it('spawn() should resolve promise with instance of Object', () => {
     const project = webhook({
-      port: 3001,
       endPoint: '/build/',
-      token: 123456,
-      secret: true,
+      port: 3001,
       response: 'Payload received. Check logs for details.',
+      secret: true,
+      token: 123456,
     });
     const commands = payload => [{
       command: 'git',
