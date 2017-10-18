@@ -8,8 +8,8 @@ describe('webhook', () => {
     const project = webhook({
       port: 3001,
       endPoint: '/build/',
-      token: 123456,
-      secret: true,
+      token: '123456',
+      secret: 'true',
       response: 'Payload received. Check logs for details.',
     });
     assert.ok(project instanceof Object);
@@ -18,8 +18,8 @@ describe('webhook', () => {
     const project = webhook({
       port: 3001,
       endPoint: '/build/',
-      token: 123456,
-      secret: true,
+      token: '123456',
+      secret: 'true',
       response: 'Payload received. Check logs for details.',
     });
     post({ port: 3001, endPoint: '/build/', data: { test: true } });
@@ -33,8 +33,8 @@ describe('webhook', () => {
       endPoint: '/build/',
       port: 3001,
       response: 'Payload received. Check logs for details.',
-      secret: true,
-      token: 123456,
+      secret: 'true',
+      token: '123456',
     });
     const commands = payload => [{
       command: 'git',
