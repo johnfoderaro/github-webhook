@@ -28,7 +28,7 @@ describe('webhook', () => {
       return assert.ok(payload instanceof Object);
     }).catch(err => console.error(err));
   });
-  it('spawn() should resolve promise with instance of Object', () => {
+  it('execute() should resolve promise with instance of Object', () => {
     const project = webhook({
       endPoint: '/build/',
       port: 3001,
@@ -36,17 +36,14 @@ describe('webhook', () => {
       secret: 'true',
       token: '123456',
     });
-    const commands = payload => [{
-      command: 'git',
-      args: ['clone', `https://${project.token}@github.com/${payload.repo}`],
-      options: {},
+    const commands = [{
+      command: 'ls',
+      args: ['-a'],
+      options: { env: process.env },
     }];
-    post({ port: 3001, endPoint: '/build/', data: { test: true } });
-    return project.listen().then((payload) => {
-      project.server.close();
-      project.spawn(commands(payload))
-        .then(stdout => assert.ok(stdout))
-        .catch(stderr => project.log(stderr));
-    });
+    return project.execute(commands)
+      .then((data) => {
+        return assert.ok(data);
+    }).catch(err => project.log(err));
   });
 });
