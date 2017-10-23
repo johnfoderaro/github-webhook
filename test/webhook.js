@@ -1,11 +1,11 @@
 const assert = require('assert');
 
-const webhook = require('./../lib/webhook');
+const Webhook = require('./../lib/webhook');
 const post = require('./post');
 
-describe('webhook', () => {
-  it('webhook should return an instance of an Object', () => {
-    const project = webhook({
+describe('Webhook', () => {
+  it('Webhook should return an instance of an Object', () => {
+    const project = Webhook({
       port: 3001,
       endPoint: '/build/',
       token: '123456',
@@ -15,7 +15,7 @@ describe('webhook', () => {
     assert.ok(project instanceof Object);
   });
   it('listen() should resolve promose with instance of Object', () => {
-    const project = webhook({
+    const project = Webhook({
       port: 3001,
       endPoint: '/build/',
       token: '123456',
@@ -29,7 +29,7 @@ describe('webhook', () => {
     }).catch(err => console.error(err));
   });
   it('execute() should resolve promise with instance of Object', () => {
-    const project = webhook({
+    const project = Webhook({
       endPoint: '/build/',
       port: 3001,
       response: 'Payload received. Check logs for details.',
@@ -42,8 +42,7 @@ describe('webhook', () => {
       options: { env: process.env },
     }];
     return project.execute(commands)
-      .then((data) => {
-        return assert.ok(data);
-    }).catch(err => project.log(err));
+      .then(data => assert.ok(data))
+      .catch(err => project.log(err));
   });
 });
