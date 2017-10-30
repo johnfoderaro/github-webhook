@@ -1,7 +1,7 @@
 const http = require('http');
 
 function post(options) {
-  const body = JSON.stringify(options.data);
+  const body = options.data;
   const request = http.request({
     port: options.port,
     path: options.path,

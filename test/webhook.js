@@ -1,4 +1,5 @@
 const assert = require('assert');
+const fs = require('fs');
 
 const Webhook = require('./../lib/webhook');
 const post = require('./post');
@@ -9,32 +10,46 @@ describe('Webhook', () => {
       port: 3001,
       endPoint: '/build/',
       token: '123456',
-      secret: 'true',
+      secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
-    assert.ok(project instanceof Object);
+    return assert.ok(project instanceof Object);
   });
-  it('listen() should resolve promose with instance of Object', () => {
+  it('listen() should resolve promise with instance of Object', () => {
     const project = Webhook({
       port: 3001,
       endPoint: '/build/',
       token: '123456',
-      secret: 'true',
+      secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
-    post({ port: 3001, endPoint: '/build/', data: { test: true } });
+    const stub = JSON.parse(fs.readFileSync('./test/data.json'));
+    post({
+      port: 3001,
+      endPoint: '/build/',
+      data: {
+        req: {
+          headers: { 'x-hub-signature': stub.header },
+        },
+      },
+    });
+    project.payload = JSON.parse(fs.readFileSync('./test/data.json'));
     return project.listen().then((payload) => {
       project.server.close();
       return assert.ok(payload instanceof Object);
-    }).catch(err => console.error(err));
+    }).catch((err) => {
+      project.log(err);
+      project.server.close();
+      return assert.fail(err);
+    });
   });
   it('execute() should resolve promise with instance of Object', () => {
     const project = Webhook({
-      endPoint: '/build/',
       port: 3001,
-      response: 'Payload received. Check logs for details.',
-      secret: 'true',
+      endPoint: '/build/',
       token: '123456',
+      secret: '123456',
+      response: 'Payload received. Check logs for details.',
     });
     const commands = [{
       command: 'ls',
