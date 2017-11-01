@@ -24,6 +24,7 @@ describe('Webhook', () => {
       response: 'Payload received. Check logs for details.',
     });
     const stub = JSON.parse(fs.readFileSync('./test/data.json'));
+    console.log(stub.header);
     post({
       port: 3001,
       endPoint: '/build/',
