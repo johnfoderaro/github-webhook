@@ -15,6 +15,7 @@ describe('Webhook', () => {
     });
     return assert.ok(project instanceof Object);
   });
+
   it('listen() should resolve promise with instance of Object', () => {
     const project = Webhook({
       port: 3001,
@@ -23,18 +24,8 @@ describe('Webhook', () => {
       secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
-    const stub = JSON.parse(fs.readFileSync('./test/data.json'));
-    console.log(stub.header);
-    post({
-      port: 3001,
-      endPoint: '/build/',
-      data: {
-        req: {
-          headers: { 'x-hub-signature': stub.header },
-        },
-      },
-    });
-    project.payload = JSON.parse(fs.readFileSync('./test/data.json'));
+    const mock = JSON.parse(fs.readFileSync('./test/mock.json'));
+    post({ mock, port: 3001, endPoint: '/build/' });
     return project.listen().then((payload) => {
       project.server.close();
       return assert.ok(payload instanceof Object);
@@ -44,7 +35,8 @@ describe('Webhook', () => {
       return assert.fail(err);
     });
   });
-  it('execute() should resolve promise with instance of Object', () => {
+
+  it('execute() should resolve promise with valid stdout data', () => {
     const project = Webhook({
       port: 3001,
       endPoint: '/build/',
@@ -58,7 +50,10 @@ describe('Webhook', () => {
       options: { env: process.env },
     }];
     return project.execute(commands)
-      .then(data => assert.ok(data))
+      .then((data) => {
+        console.log(data);        
+        assert.ok(data);
+      })
       .catch(err => project.log(err));
   });
 });
