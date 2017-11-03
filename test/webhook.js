@@ -37,6 +37,7 @@ describe('Webhook', () => {
   });
 
   it('execute() should resolve promise with valid stdout data', () => {
+    const mock = [ '.\n..\n.eslintrc.js\n.git\n.gitignore\nexample\nindex.js\nlib\nnode_modules\npackage-lock.json\npackage.json\nreadme.md\ntest\n' ];
     const project = Webhook({
       port: 3001,
       endPoint: '/build/',
@@ -52,7 +53,7 @@ describe('Webhook', () => {
     return project.execute(commands)
       .then((data) => {
         console.log(data);        
-        assert.ok(data);
+        assert.ok(data.);
       })
       .catch(err => project.log(err));
   });
