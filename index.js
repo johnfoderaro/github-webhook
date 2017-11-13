@@ -56,18 +56,21 @@ class WebHook {
           try {
             WebHook.verify(this);
           } catch (error) {
+            const errorString = error.toString();
             res.writeHead(401, {
-              'Content-Length': Buffer.byteLength(error.toString()),
+              'Content-Length': Buffer.byteLength(errorString),
               'Content-Type': 'text/json',
-            }, error.toString());
-            res.end();
+              'X-Powered-By': 'https://jfod.me',
+            }, errorString);
+            res.end(errorString);
             return reject(error);
           }
           res.writeHead(200, {
             'Content-Length': Buffer.byteLength(this.settings.response),
             'Content-Type': 'text/json',
+            'X-Powered-By': 'https://jfod.me',
           }, this.settings.response);
-          res.end();
+          res.end(this.settings.response);
           return resolve(this.payload);
         });
       }).listen(this.settings.port);

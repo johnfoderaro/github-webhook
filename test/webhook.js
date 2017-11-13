@@ -1,15 +1,29 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const Webhook = require('./../lib/webhook');
+const webhook = require('./../index');
 const post = require('./post');
 
-describe('Webhook', () => {
-  it('Webhook should return an instance of an Object', () => {
-    const project = Webhook({
+describe('webhook', () => {
+  it('webhook should throw error if incorrect options', () => {
+    assert.throws(() => webhook(), Error);
+    assert.throws(() => webhook({
+      port: '3001',
+      endPoint: '/build/',
+      secret: '123456',
+      response: 'Payload received. Check logs for details.',
+    }), Error);
+    assert.throws(() => webhook({
+      port: 3001,
+      endPoint: true,
+      secret: [],
+      response: {},
+    }), Error);
+  });
+  it('webhook should return an instance of an Object', () => {
+    const project = webhook({
       port: 3001,
       endPoint: '/build/',
-      token: '123456',
       secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
@@ -17,10 +31,9 @@ describe('Webhook', () => {
   });
 
   it('listen() should resolve promise with instance of Object', () => {
-    const project = Webhook({
+    const project = webhook({
       port: 3001,
       endPoint: '/build/',
-      token: '123456',
       secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
@@ -30,18 +43,17 @@ describe('Webhook', () => {
       project.server.close();
       return assert.ok(payload instanceof Object);
     }).catch((err) => {
-      project.log(err);
+      console.error(err);
       project.server.close();
       return assert.fail(err);
     });
   });
 
   it('execute() should resolve promise with valid stdout data', () => {
-    const mock = ['.\n..\n.eslintrc.js\n.git\n.gitignore\nexample\nindex.js\nlib\nnode_modules\npackage-lock.json\npackage.json\nreadme.md\ntest\n'];
-    const project = Webhook({
+    const mock = ['.\n..\n.eslintrc.js\n.git\n.gitignore\nindex.js\nnode_modules\npackage-lock.json\npackage.json\nreadme.md\ntest\n'];
+    const project = webhook({
       port: 3001,
       endPoint: '/build/',
-      token: '123456',
       secret: '123456',
       response: 'Payload received. Check logs for details.',
     });
@@ -51,10 +63,7 @@ describe('Webhook', () => {
       options: { env: process.env },
     }];
     return project.execute(commands)
-      .then((data) => {
-        console.log(data);
-        assert.ok(data);
-      })
-      .catch(err => project.log(err));
+      .then(data => assert.ok(data.stdout[0] === mock[0]))
+      .catch(err => assert.fail(err));
   });
 });
