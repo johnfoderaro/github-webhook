@@ -1,7 +1,7 @@
 {
-  "name": "webhook",
+  "name": "@johnfoderaro/webhook",
   "version": "1.0.0",
-  "description": "Web hook app",
+  "description": "⚡️RESTful API endpoint for interacting with GitHub's web hook service",
   "main": "index.js",
   "scripts": {
     "test": "mocha",

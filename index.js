@@ -42,6 +42,11 @@ class WebHook {
       this.server = http.createServer(handler);
       return this.server;
     };
+    const writeHead = (res, status, content) => res.writeHead(status, {
+      'Content-Length': Buffer.byteLength(content),
+      'Content-Type': 'text/json',
+      'X-Powered-By': 'https://jfod.me',
+    }, content);
     return new Promise((resolve, reject) => {
       server((req, res) => {
         const reqBody = [];
@@ -57,19 +62,11 @@ class WebHook {
             WebHook.verify(this);
           } catch (error) {
             const errorString = error.toString();
-            res.writeHead(401, {
-              'Content-Length': Buffer.byteLength(errorString),
-              'Content-Type': 'text/json',
-              'X-Powered-By': 'https://jfod.me',
-            }, errorString);
+            writeHead(res, 401, errorString);
             res.end(errorString);
             return reject(error);
           }
-          res.writeHead(200, {
-            'Content-Length': Buffer.byteLength(this.settings.response),
-            'Content-Type': 'text/json',
-            'X-Powered-By': 'https://jfod.me',
-          }, this.settings.response);
+          writeHead(res, 200, this.settings.response);
           res.end(this.settings.response);
           return resolve(this.payload);
         });
