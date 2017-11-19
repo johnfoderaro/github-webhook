@@ -37,7 +37,7 @@ class WebHook {
     }
   }
 
-  listen() {
+  listen(callback) {
     const server = (handler) => {
       this.server = http.createServer(handler);
       return this.server;
@@ -47,50 +47,46 @@ class WebHook {
       'Content-Type': 'text/json',
       'X-Powered-By': 'https://jfod.me',
     }, content);
-    return new Promise((resolve, reject) => {
-      server((req, res) => {
-        const reqBody = [];
-        req.on('error', err => reject(err));
-        req.on('data', chunk => reqBody.push(chunk));
-        req.on('end', () => {
-          this.payload = {
-            header: req.headers['x-hub-signature'],
-            buffer: Buffer.concat(reqBody),
-            data: JSON.parse(Buffer.concat(reqBody).toString()),
-          };
-          try {
-            WebHook.verify(this);
-          } catch (error) {
-            const errorString = error.toString();
-            writeHead(res, 401, errorString);
-            res.end(errorString);
-            return reject(error);
-          }
-          writeHead(res, 200, this.settings.response);
-          res.end(this.settings.response);
-          return resolve(this.payload);
-        });
-      }).listen(this.settings.port);
-    });
+    server((req, res) => {
+      const reqBody = [];
+      req.on('error', err => callback(err));
+      req.on('data', chunk => reqBody.push(chunk));
+      req.on('end', () => {
+        this.payload = {
+          header: req.headers['x-hub-signature'],
+          buffer: Buffer.concat(reqBody),
+          data: JSON.parse(Buffer.concat(reqBody).toString()),
+        };
+        try {
+          WebHook.verify(this);
+        } catch (error) {
+          const errorString = error.toString();
+          writeHead(res, 401, errorString);
+          res.end(errorString);
+          return callback(error);
+        }
+        writeHead(res, 200, this.settings.response);
+        res.end(this.settings.response);
+        return callback(JSON.stringify(this.payload.data));
+      });
+    }).listen(this.settings.port);
   }
 
-  execute(array) {
+  execute(array, callback) {
     let count = 0;
-    return new Promise((resolve, reject) => {
-      const run = (input, next) => {
-        const cmd = spawn(input.command, input.args, input.options);
-        cmd.stdout.on('data', data => this.stdout.push(data.toString()));
-        cmd.stderr.on('data', data => this.stderr.push(data.toString()));
-        cmd.on('error', err => reject(err));
-        cmd.on('close', code => (code > 0 ? reject(code) : next()));
-      };
-      const next = () => {
-        count += 1;
-        const status = count < array.length;
-        return status ? run(array[count], next) : resolve(this);
-      };
-      run(array[count], next);
-    });
+    const run = (input, next) => {
+      const cmd = spawn(input.command, input.args, input.options);
+      cmd.stdout.on('data', data => this.stdout.push(data.toString()));
+      cmd.stderr.on('data', data => this.stderr.push(data.toString()));
+      cmd.on('error', err => callback(err));
+      cmd.on('close', code => (code > 0 ? callback(code) : next()));
+    };
+    const next = () => {
+      count += 1;
+      const status = count < array.length;
+      return status ? run(array[count], next) : callback(this);
+    };
+    run(array[count], next);
   }
 }
 

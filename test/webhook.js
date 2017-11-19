@@ -39,14 +39,7 @@ describe('webhook', () => {
     });
     const mock = JSON.parse(fs.readFileSync('./test/mock.json'));
     post({ mock, port: 3001, endPoint: '/build/' });
-    return project.listen().then((payload) => {
-      project.server.close();
-      return assert.ok(payload instanceof Object);
-    }).catch((err) => {
-      console.error(err);
-      project.server.close();
-      return assert.fail(err);
-    });
+    project.listen(payload => assert.ok(JSON.parse(payload) instanceof Object));
   });
 
   it('execute() should resolve promise with valid stdout data', () => {
@@ -62,8 +55,6 @@ describe('webhook', () => {
       args: ['-a'],
       options: { env: process.env },
     }];
-    return project.execute(commands)
-      .then(data => assert.ok(data.stdout[0] === mock[0]))
-      .catch(err => assert.fail(err));
+    project.execute(commands, data => assert.ok(data.stdout[0] === mock[0]));
   });
 });

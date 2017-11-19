@@ -1,11 +1,11 @@
 {
-  "name": "@johnfoderaro/webhook",
+  "name": "@johnfoderaro/github-webhook",
   "version": "1.0.0",
   "description": "⚡️RESTful API endpoint for interacting with GitHub's web hook service",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "start": "nodemon index.js --delay 500ms --ignore test/ & mocha -w"
+    "start": "nodemon index.js --delay 500ms & mocha -w"
   },
   "author": "John Foderaro",
   "license": "MIT",
