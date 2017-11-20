@@ -26,6 +26,7 @@ project01.listen((response) => {
   }
   const data = JSON.parse(response.data);
   console.log(data);
+});
 ```
 
 #### Execute commands after recieving a JSON payload from GitHub
