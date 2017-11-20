@@ -55,6 +55,6 @@ describe('webhook', () => {
       args: ['-a'],
       options: { env: process.env },
     }];
-    project.execute(commands, data => assert.ok(data.stdout[0] === mock[0]));
+    project.execute(commands, (err, data) => assert.ok(data.stdout[0] === mock[0]));
   });
 });

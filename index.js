@@ -49,7 +49,7 @@ class WebHook {
     }, content);
     server((req, res) => {
       const reqBody = [];
-      req.on('error', err => callback(err));
+      req.on('error', error => callback({ error, data: null }));
       req.on('data', chunk => reqBody.push(chunk));
       req.on('end', () => {
         this.payload = {
@@ -63,11 +63,11 @@ class WebHook {
           const errorString = error.toString();
           writeHead(res, 401, errorString);
           res.end(errorString);
-          return callback(error);
+          return callback({ error, data: null });
         }
         writeHead(res, 200, this.settings.response);
         res.end(this.settings.response);
-        return callback(JSON.stringify(this.payload.data));
+        return callback({ error: null, data: JSON.stringify(this.payload.data) });
       });
     }).listen(this.settings.port);
   }
@@ -78,13 +78,13 @@ class WebHook {
       const cmd = spawn(input.command, input.args, input.options);
       cmd.stdout.on('data', data => this.stdout.push(data.toString()));
       cmd.stderr.on('data', data => this.stderr.push(data.toString()));
-      cmd.on('error', err => callback(err));
-      cmd.on('close', code => (code > 0 ? callback(code) : next()));
+      cmd.on('error', error => callback(error, null));
+      cmd.on('close', code => (code > 0 ? callback(null, code) : next()));
     };
     const next = () => {
       count += 1;
       const status = count < array.length;
-      return status ? run(array[count], next) : callback(this);
+      return status ? run(array[count], next) : callback(null, this);
     };
     run(array[count], next);
   }

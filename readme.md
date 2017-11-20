@@ -20,10 +20,12 @@ const project01 = webhook({
   response: 'Payload received. Check logs for details.',
 });
 
-project01.listen()
-  .then(payload => console.log(JSON.parse(payload));
-  .catch(err => console.err(err));
-});
+project01.listen((response) => {
+  if (response.error) {
+    return console.error(response.error);
+  }
+  const data = JSON.parse(response.data);
+  console.log(data);
 ```
 
 #### Execute commands after recieving a JSON payload from GitHub
@@ -34,15 +36,18 @@ const webhook = require('@johnfoderaro/github-webhook');
 const project01 = webhook({
   port: 3000,
   endPoint: '/build/',
-  secret: '123456',
+  secret: '<YOUR GITHUB WEB HOOK SECRET>',
   response: 'Payload received. Check logs for details.',
 });
 
-project01.listen().then((payload) => {
-  const data = JSON.parse(payload);
+project01.listen((response) => {
+  if (response.error) {
+    return console.log(response.error);
+  }
+  const data = JSON.parse(response.data);
   const repo = data.name;
   const url = data.repository.html_url;
-  project01.execute([{
+  const commands = [{
     command: 'git',
     args: ['clone', url],
     options: { env: process.env },
@@ -54,8 +59,15 @@ project01.listen().then((payload) => {
     command: 'npm',
     args: ['i'],
     options: { env: process.env },  
-  }])
-  .then(project => console.log(project.stdout))
-  .catch(err => console.err(err));
+  }];
+  project01.execute(commands, (error, project) => {
+    if (error) {
+      return console.error(error);
+    }
+    console.log({ 
+      stderr: project.stderr,
+      stdout: project.stdout,
+    });
+  });
 });
 ```
