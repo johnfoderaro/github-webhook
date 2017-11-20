@@ -2,13 +2,13 @@ const http = require('http');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 
-class WebHook {
+class Webhook {
   constructor(options = {}) {
     this.stdout = [];
     this.stderr = [];
     this.payload = {};
     this.server = null;
-    this.settings = WebHook.validate(options);
+    this.settings = Webhook.validate(options);
   }
 
   static validate(options) {
@@ -58,7 +58,7 @@ class WebHook {
           data: JSON.parse(Buffer.concat(reqBody).toString()),
         };
         try {
-          WebHook.verify(this);
+          Webhook.verify(this);
         } catch (error) {
           const errorString = error.toString();
           writeHead(res, 401, errorString);
@@ -79,7 +79,7 @@ class WebHook {
       cmd.stdout.on('data', data => this.stdout.push(data.toString()));
       cmd.stderr.on('data', data => this.stderr.push(data.toString()));
       cmd.on('error', error => callback(error, null));
-      cmd.on('close', code => (code > 0 ? callback(null, code) : next()));
+      cmd.on('close', code => (code > 0 ? callback(code, null) : next()));
     };
     const next = () => {
       count += 1;
@@ -90,4 +90,4 @@ class WebHook {
   }
 }
 
-module.exports = opts => new WebHook(opts);
+module.exports = opts => new Webhook(opts);
