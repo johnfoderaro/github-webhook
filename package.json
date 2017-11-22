@@ -22,10 +22,10 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johnfoderaro/webhook.git"
+    "url": "git+https://github.com/johnfoderaro/github-webhook.git"
   },
   "bugs": {
-    "url": "https://github.com/johnfoderaro/webhook/issues"
+    "url": "https://github.com/johnfoderaro/github-webhook/issues"
   },
-  "homepage": "https://github.com/johnfoderaro/webhook#readme"
+  "homepage": "https://github.com/johnfoderaro/github-webhook#readme"
 }
