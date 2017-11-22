@@ -1,7 +1,7 @@
 {
   "name": "@johnfoderaro/github-webhook",
   "version": "1.0.0",
-  "description": "⚡️RESTful API endpoint for interacting with GitHub's web hook service",
+  "description": "⚡️Simple module for interacting with GitHub Webhooks",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
@@ -17,7 +17,6 @@
     "nodemon": "^1.12.1"
   },
   "directories": {
-    "lib": "lib",
     "test": "test"
   },
   "dependencies": {},
