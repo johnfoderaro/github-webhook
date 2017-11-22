@@ -79,6 +79,8 @@ project01.listen((response) => {
 
 ## Usage
 
+#### `webhook(object)`
+
 `webhook(object)` returns an instance of the `Webhook` class and accepts an options object as its only argument. The options object must contain the following required pieces of inforation:
 
 ```
@@ -102,11 +104,11 @@ The `Webhook` class instance returns a `settings` and `server` object. The `serv
 
 ### Instance Methods
 
-`listen(callback)`
+#### `listen(callback)`
 
 The `listen` method accepts a callback function as its argument, returning an object containing `error` and `data` properties from the class's instantiated `http` server. The `data` property is a JSON object containing the payload from GitHub.
 
-`execute(array, callback)`
+#### `execute(array, callback)`
 
 The `execute` method accepts an array and a callback as its arguments. The array represents an array of commands to be executed asychronously from the `spawn` method within the class's own `child_process` instance. This array must contain objects in an format identical to that of what's defined within the Node.js documentation for the `spawn` method itself. For more information, please read about the [`spawn` method in the Child Processes documentation](https://nodejs.org/docs/latest-v8.x/api/child_process.html#child_process_child_process_spawn_command_args_options).
 
