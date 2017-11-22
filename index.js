@@ -4,9 +4,6 @@ const { spawn } = require('child_process');
 
 class Webhook {
   constructor(options = {}) {
-    this.stdout = [];
-    this.stderr = [];
-    this.payload = {};
     this.server = null;
     this.settings = Webhook.validate(options);
   }
@@ -28,16 +25,17 @@ class Webhook {
     return options;
   }
 
-  static verify(webhook) {
-    const { payload: { header, buffer }, settings: { secret } } = webhook;
+  static verify(input) {
+    const { data, header, secret } = input;
     const hmac = crypto.createHmac('sha1', secret);
-    hmac.update(buffer, 'utf-8');
+    hmac.update(data, 'utf-8');
     if (header !== `sha1=${hmac.digest('hex')}`) {
       throw new Error('Invalid signature.');
     }
   }
 
   listen(callback) {
+    const { settings: { port, response, secret } } = this;
     const server = (handler) => {
       this.server = http.createServer(handler);
       return this.server;
@@ -45,48 +43,48 @@ class Webhook {
     const writeHead = (res, status, content) => res.writeHead(status, {
       'Content-Length': Buffer.byteLength(content),
       'Content-Type': 'text/json',
-      'X-Powered-By': 'https://jfod.me',
     }, content);
     server((req, res) => {
-      const reqBody = [];
+      const buffer = [];
       req.on('error', error => callback({ error, data: null }));
-      req.on('data', chunk => reqBody.push(chunk));
+      req.on('data', chunk => buffer.push(chunk));
       req.on('end', () => {
-        this.payload = {
-          header: req.headers['x-hub-signature'],
-          buffer: Buffer.concat(reqBody),
-          data: JSON.parse(Buffer.concat(reqBody).toString()),
-        };
+        const header = req.headers['x-hub-signature'];
+        const data = Buffer.concat(buffer).toString();
         try {
-          Webhook.verify(this);
+          Webhook.verify({ data, header, secret });
         } catch (error) {
           const errorString = error.toString();
           writeHead(res, 401, errorString);
           res.end(errorString);
           return callback({ error, data: null });
         }
-        writeHead(res, 200, this.settings.response);
-        res.end(this.settings.response);
-        return callback({ error: null, data: JSON.stringify(this.payload.data) });
+        writeHead(res, 200, response);
+        res.end(response);
+        return callback({ error: null, data });
       });
-    }).listen(this.settings.port);
+    }).listen(port, () => console.log(`github-webhook listening on port: ${port}`));
+    return this;
   }
 
   execute(array, callback) {
     let count = 0;
+    const output = { stdout: [], stderr: [] };
     const run = (input, next) => {
       const cmd = spawn(input.command, input.args, input.options);
-      cmd.stdout.on('data', data => this.stdout.push(data.toString()));
-      cmd.stderr.on('data', data => this.stderr.push(data.toString()));
+      const push = (type, data) => output[type].push(data.toString());
+      cmd.stdout.on('data', data => push('stdout', data));
+      cmd.stderr.on('data', data => push('stderr', data));
       cmd.on('error', error => callback(error, null));
-      cmd.on('close', code => (code > 0 ? callback(code, null) : next()));
+      cmd.on('close', code => (code > 0 ? callback(new Error(`child process exited with code ${code}`), null) : next()));
     };
     const next = () => {
       count += 1;
       const status = count < array.length;
-      return status ? run(array[count], next) : callback(null, this);
+      return status ? run(array[count], next) : callback(null, output);
     };
     run(array[count], next);
+    return this;
   }
 }
 

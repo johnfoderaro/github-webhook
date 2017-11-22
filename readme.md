@@ -1,10 +1,10 @@
 # GitHub Webhook
 
-Simple RESTful API endpoint for GitHub webhooks. Listen for JSON payloads and then optionally execute commands asychronously based upon data from the GitHub JSON payload. This class is essentially a wrapper around several core Node.js modules -- specifically: `http`, `crypto` and `child_process`.
+Simple module for interacting with GitHub Webhooks. Listen for GitHub JSON payloads and then optionally execute commands asychronously based upon data from the payload. This class is essentially a wrapper around several core Node.js modules -- specifically: `http`, `crypto` and `child_process`.
 
 ## Benefits
 
-This is a slimmed down version of code that I have been using over the past several months to help facilitate continous integration and deployment projects. I find that the GitHub webhook feature is very useful, especially with "release" events, as different builds and destinations can be triggered so that a project can be built, tested, and deployed automatically with little manual intervention beyond standard release notes and GitHub best practices. Enjoy!
+This is a slimmed down version of code that I have been using over the past several months which helps facilitate some of my project's continous integration and deployment needs. I find that the GitHub Webhook feature is very useful, especially with "release" events, as different builds and destinations can be triggered. That way, a project can be built, tested, and deployed automatically with little manual intervention beyond standard release notes and GitHub best practices. Place this app behind an NGINX reverse proxy, pair it up with PM2, and you'll be all set. Enjoy!
 
 ## Installing
 
@@ -20,13 +20,14 @@ const webhook = require('@johnfoderaro/github-webhook');
 const project01 = webhook({
   port: 3000,
   endPoint: '/build/',
-  secret: '123456',
+  secret: '<YOUR GITHUB WEB HOOK SECRET>',
   response: 'Payload received. Check logs for details.',
 });
 
 project01.listen((response) => {
   if (response.error) {
-    return console.error(response.error);
+    console.error(response.error);
+    return;
   }
   const data = JSON.parse(response.data);
   console.log(data);
@@ -47,7 +48,8 @@ const project01 = webhook({
 
 project01.listen((response) => {
   if (response.error) {
-    return console.log(response.error);
+    console.log(response.error);
+    return;
   }
   const data = JSON.parse(response.data);
   const repo = data.name;
@@ -63,16 +65,14 @@ project01.listen((response) => {
   }, {
     command: 'npm',
     args: ['run', 'build'],
-    options: { env: process.env },  
+    options: { env: process.env },
   }];
-  project01.execute(commands, (error, project) => {
+  project01.execute(commands, (error, output) => {
     if (error) {
-      return console.error(error);
+      console.error(error);
+      return;
     }
-    console.log({ 
-      stderr: project.stderr,
-      stdout: project.stdout,
-    });
+    console.log({ output });
   });
 });
 ```
@@ -96,13 +96,15 @@ project01.listen((response) => {
 
 `secret` must be string for an HMAC hext digest of the payload itself. This is provided to GitHub within the repository's webhook settings.
 
-`response` must be a string. This is the response body to GitHub after a successful POST request.   
+`response` must be a string. This is the response body to GitHub after a successful POST request.
+
+The `Webhook` class instance returns a `settings` and `server` object. The `server` object is the `http` instance instantiated by the `Webhook` instance.
 
 ### Instance Methods
 
 `listen(callback)`
 
-The `listen` method accepts a callback function as its argument, returning an object with `error` and `data` properties from the class's instantiated HTTP server. The `data` propertiy is a JSON object containing the payload directly from GitHub.
+The `listen` method accepts a callback function as its argument, returning an object containing `error` and `data` properties from the class's instantiated `http` server. The `data` property is a JSON object containing the payload from GitHub.
 
 `execute(array, callback)`
 
@@ -116,31 +118,22 @@ The `execute` method accepts an array and a callback as its arguments. The array
 }
 ```
 
-The callback function accepts an `error` and the `webhook` instance as its parameters. The webhook parameter is an object with:
+The callback function returns an `error` and an `output`. `output` is an object with:
 
 ```
 {
   stdout: <array>,
   stderr: <array>,
-  payload: <object>,
-  server: <object>,
-  settings: <object>,
 }
 ```
 
-`stdout` and `stderr` are both arrays containing all stdout and stderr buffers, per command execution, converted to strings.
-
-`payload` is JavaScript object representing the JSON payload received from GitHub.
-
-`server` is the Node.js `http` server instance created by the `Webhook` class.
-
-`settings` is an object containing all of the options used to instantiate an instance of the `Webhook` class.
+`stdout` and `stderr` are both arrays containing all stdout and stderr streams, per command execution, converted to strings.
 
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2016 John Foderaro
+Copyright (c) 2017 John Foderaro
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
