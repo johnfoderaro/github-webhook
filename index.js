@@ -26,10 +26,10 @@ class Webhook {
   }
 
   static verify(input) {
-    const { data, header, secret } = input;
+    const { data, signature, secret } = input;
     const hmac = crypto.createHmac('sha1', secret);
     hmac.update(data, 'utf-8');
-    if (header !== `sha1=${hmac.digest('hex')}`) {
+    if (signature !== `sha1=${hmac.digest('hex')}`) {
       throw new Error('Invalid signature.');
     }
   }
@@ -46,22 +46,23 @@ class Webhook {
     }, content);
     server((req, res) => {
       const buffer = [];
-      req.on('error', error => callback({ error, data: null }));
+      const { headers } = req;
+      req.on('error', error => callback({ error, data: null, headers }));
       req.on('data', chunk => buffer.push(chunk));
       req.on('end', () => {
-        const header = req.headers['x-hub-signature'];
+        const signature = headers['x-hub-signature'];
         const data = Buffer.concat(buffer).toString();
         try {
-          Webhook.verify({ data, header, secret });
+          Webhook.verify({ data, signature, secret });
         } catch (error) {
           const errorString = error.toString();
           writeHead(res, 401, errorString);
           res.end(errorString);
-          return callback({ error, data: null });
+          return callback({ error, data: null, headers });
         }
         writeHead(res, 200, response);
         res.end(response);
-        return callback({ error: null, data });
+        return callback({ error: null, data: JSON.parse(data), headers });
       });
     }).listen(port, () => console.log(`github-webhook listening on port: ${port}`));
     return this;

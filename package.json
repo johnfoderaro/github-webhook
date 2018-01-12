@@ -1,9 +1,13 @@
 {
   "name": "@johnfoderaro/github-webhook",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "⚡️Simple module for interacting with GitHub Webhooks",
   "main": "index.js",
-  "keywords": ["api", "github", "webhook"],
+  "keywords": [
+    "api",
+    "github",
+    "webhook"
+  ],
   "scripts": {
     "test": "mocha",
     "start": "nodemon index.js --delay 500ms --ignore test/ & mocha -w"
