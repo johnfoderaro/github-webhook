@@ -76,8 +76,8 @@ class Webhook {
       const push = (type, data) => output[type].push(data.toString());
       cmd.stdout.on('data', data => push('stdout', data));
       cmd.stderr.on('data', data => push('stderr', data));
-      cmd.on('error', error => callback(error, null));
-      cmd.on('close', code => (code > 0 ? callback(new Error(`child process exited with code ${code}`), null) : next()));
+      cmd.on('error', error => callback(error, output));
+      cmd.on('close', code => (code > 0 ? callback(new Error(`child process exited with code ${code}`), output) : next()));
     };
     const next = () => {
       count += 1;

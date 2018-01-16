@@ -40,9 +40,7 @@ describe('webhook', () => {
     const mock = JSON.parse(fs.readFileSync('./test/mock.json'));
     post({ mock, port: 3001, endPoint: '/build/' });
     project.listen((payload) => {
-      const { error, data, headers } = payload;
-      console.log(error, data, headers);
-      // assert.ok(JSON.parse(data) instanceof Object);
+      assert.ok(payload instanceof Object);
     });
   });
 
